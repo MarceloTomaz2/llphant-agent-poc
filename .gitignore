@@ -1,0 +1,4 @@
+vendor/
+.env
+bkp/
+test_dotenv.php
