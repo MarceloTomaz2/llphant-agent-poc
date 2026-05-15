@@ -17,8 +17,14 @@ Nesta versão de estudos, evoluímos a base para ser totalmente Orientada a Obje
 3. Entra em um loop contínuo de avaliação e execução, garantindo que o Agente faça quantas chamadas de ferramenta forem necessárias até conseguir processar a resposta final para o usuário.
 
 ## 🛠️ Como Utilizar
-- Configure as chaves de API clonando o `.env_exemple` para `.env` na raiz.
-- Você interage e dá a instrução inicial ao Agente instanciando-o e rodando o comando no `index.php`.
-- Testes unitários foram preparados com o **PHPUnit** na pasta `tests/` para validar o motor de iterações (`AgentRunner`).
+- **Buscas na Internet (SearXNG):** Este projeto utiliza o **[SearXNG](https://github.com/searxng/searxng)** como motor de pesquisa para evitar limites de requisição de buscadores convencionais.
+  - Para subir o container do SearXNG, acesse o diretório `docker/searxng` e execute o comando:
+    ```bash
+    docker-compose up -d
+    ```
+  - Após iniciar, certifique-se de configurar a variável `SEARXNG_URL` no seu `.env` com a URL local do serviço (ex: `http://localhost:9085/search` ou o IP específico configurado).
+- **Configuração:** Configure as chaves de API clonando o `.env_exemple` para `.env` na raiz.
+- **Execução:** Você interage e dá a instrução inicial ao Agente instanciando-o e rodando o comando no `index.php`.
+- **Testes:** Testes unitários foram preparados com o **PHPUnit** na pasta `tests/` para validar o motor de iterações (`AgentRunner`).
 
 > **Nota:** Este projeto é de caráter puramente experimental. Idealizado como base de código para testar capacidades em IA, desenvolvimento orientado a Skills modulares e manutenções assistidas.
