@@ -16,25 +16,45 @@ use SearchAgent\AI\Tools\ReadSkillTool;
 class AgentRunner
 {
     private OpenAIChat $chat;
-    private array $messages = [];
-    private int $maxIterations = 20;
+    private MessageCollection $messages;
+    private int $maxIterations;
+    private array $options;
 
-    public function __construct(?OpenAIChat $chat = null)
+    public function __construct(array $options = [], ?OpenAIChat $chat = null)
     {
-        // Carrega .env a partir da raiz do projeto (assumindo que o AgentRunner está em src/AI/Agent)
-        $dotenv = Dotenv::createMutable(dirname(__DIR__, 3));
-        $dotenv->safeLoad();
+        $this->messages = new MessageCollection();
+        // Verifica se o pacote está rodando de dentro da pasta "vendor" de outro projeto (ex: Adianti)
+        $isVendor = strpos(__DIR__, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR) !== false;
+        
+        // Se estiver no vendor, a raiz do projeto hospedeiro está 5 níveis acima. Senão, está a 3.
+        $rootPath = $isVendor ? dirname(__DIR__, 5) : dirname(__DIR__, 3);
+        
+        if (file_exists($rootPath . DIRECTORY_SEPARATOR . '.env')) {
+            $dotenv = Dotenv::createMutable($rootPath);
+            $dotenv->safeLoad();
+        }
+
+        $this->options = array_merge([
+            'maxIterations' => 20,
+            'temperature' => 1.0,
+            'apiKey' => $_ENV['OPENAI_API_KEY'] ?? $_SERVER['OPENAI_API_KEY'] ?? '',
+            'url' => $_ENV['OPENAI_API_URL'] ?? $_SERVER['OPENAI_API_URL'] ?? 'https://api.openai.com/v1/',
+            'model' => $_ENV['OPENAI_API_MODEL'] ?? $_SERVER['OPENAI_API_MODEL'] ?? 'openai/gpt-4.1-mini',
+            'systemPrompt' => "Você é um assistente virtual útil e inteligente."
+        ], $options);
+
+        $this->maxIterations = $this->options['maxIterations'];
 
         if ($chat === null) {
 
             $config = new OpenAIConfig();
-            $config->apiKey = $_ENV['OPENAI_API_KEY'] ?? $_SERVER['OPENAI_API_KEY'] ?? '';
-            $config->url = $_ENV['OPENAI_API_URL'] ?? $_SERVER['OPENAI_API_URL'] ?? 'https://api.openai.com/v1/';
-            $config->model = $_ENV['OPENAI_API_MODEL'] ?? $_SERVER['OPENAI_API_MODEL'] ?? 'openai/gpt-4.1-mini';
+            $config->apiKey = $this->options['apiKey'];
+            $config->url = $this->options['url'];
+            $config->model = $this->options['model'];
 
             $config->modelOptions = [
                 'stream' => false,
-                'temperature' => 1.0,
+                'temperature' => $this->options['temperature'],
             ];
 
             $this->chat = new OpenAIChat($config);
@@ -42,16 +62,22 @@ class AgentRunner
             $this->chat = $chat;
         }
 
-        $this->setupSystemPrompt();
+        $this->setupSystemPrompt($this->options['systemPrompt']);
         $this->setupTools();
     }
 
-    private function setupSystemPrompt(): void
+    public function setSystemPrompt(string $basePrompt): void
+    {
+        $this->options['systemPrompt'] = $basePrompt;
+        $this->setupSystemPrompt($basePrompt);
+    }
+
+    private function setupSystemPrompt(string $basePrompt): void
     {
         $skills = ReadSkillTool::listSkills();
         $date = date('d/m/Y');
 
-        $prompt = "Você é um assistente virtual útil e inteligente.
+        $prompt = $basePrompt . "\n
 Para completar as tarefas solicitadas, identifique a melhor abordagem usando as TOOLS e SKILLS disponíveis.
 
 # TOOLS
@@ -98,16 +124,21 @@ Para completar as tarefas solicitadas, identifique a melhor abordagem usando as 
         $this->chat->addTool($readSkillTool);
     }
 
+    public function addTool(FunctionInfo $tool): void
+    {
+        $this->chat->addTool($tool);
+    }
+
     public function run(string $prompt): string
     {
-        $this->messages[] = Message::user($prompt);
+        $this->messages->add(Message::user($prompt));
 
         $iteration = 0;
 
         while ($iteration < $this->maxIterations) {
             $iteration++;
 
-            $result = $this->chat->generateChatOrReturnFunctionCalled($this->messages);
+            $result = $this->chat->generateChatOrReturnFunctionCalled($this->messages->toArray());
 
             if (is_string($result)) {
                 return $result;
@@ -116,7 +147,7 @@ Para completar as tarefas solicitadas, identifique a melhor abordagem usando as 
             foreach ($result as $functionInfo) {
                 // Resolve the tool call and collect messages to send back.
                 $toolMessages = $functionInfo->callAndReturnAsOpenAIMessages();
-                $this->messages = array_merge($this->messages, $toolMessages);
+                $this->messages->addMany($toolMessages);
             }
         }
 
@@ -125,7 +156,19 @@ Para completar as tarefas solicitadas, identifique a melhor abordagem usando as 
 
     public function getMessages(): array
     {
-        return $this->messages;
+        return $this->messages->toArray();
+    }
+
+    /**
+     * @param Message[]|MessageCollection $messages
+     */
+    public function setMessages(array|MessageCollection $messages): void
+    {
+        if ($messages instanceof MessageCollection) {
+            $this->messages = $messages;
+        } else {
+            $this->messages = new MessageCollection($messages);
+        }
     }
 
     public function getChat(): OpenAIChat
@@ -135,6 +178,6 @@ Para completar as tarefas solicitadas, identifique a melhor abordagem usando as 
 
     public function reset(): void
     {
-        $this->messages = [];
+        $this->messages->reset();
     }
 }

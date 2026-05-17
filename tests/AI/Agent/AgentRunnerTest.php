@@ -21,7 +21,7 @@ class AgentRunnerTest extends TestCase
     {
         // Ao passar o mock, não chamará a API real no construtor (embora OpenAIChat não chame no construtor)
         $chatMock = $this->createMock(OpenAIChat::class);
-        $runner = new AgentRunner($chatMock);
+        $runner = new AgentRunner([], $chatMock);
         
         $this->assertInstanceOf(AgentRunner::class, $runner);
     }
@@ -34,7 +34,7 @@ class AgentRunnerTest extends TestCase
                  ->method('generateChatOrReturnFunctionCalled')
                  ->willReturn('Resposta final de teste');
 
-        $runner = new AgentRunner($chatMock);
+        $runner = new AgentRunner([], $chatMock);
         $result = $runner->run('Olá, mundo');
 
         $this->assertEquals('Resposta final de teste', $result);
@@ -54,7 +54,7 @@ class AgentRunnerTest extends TestCase
                  ->method('generateChatOrReturnFunctionCalled')
                  ->willReturn([]);
 
-        $runner = new AgentRunner($chatMock);
+        $runner = new AgentRunner([], $chatMock);
         $result = $runner->run('Teste de loop infinito');
 
         $this->assertEquals('Limite de iterações atingido.', $result);
@@ -66,7 +66,7 @@ class AgentRunnerTest extends TestCase
         $chatMock->method('generateChatOrReturnFunctionCalled')
                  ->willReturn('Teste');
 
-        $runner = new AgentRunner($chatMock);
+        $runner = new AgentRunner([], $chatMock);
         $runner->run('Mensagem 1');
         
         $this->assertNotEmpty($runner->getMessages());

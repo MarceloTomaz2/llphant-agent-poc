@@ -7,7 +7,8 @@ O projeto `search-agent` (ou LLPhant Agent) é uma aplicação em PHP construíd
 
 ## 2. Estrutura do Projeto
 
-* `src/AI/Agent/AgentRunner.php`: **O coração da execução do agente.** É uma classe orientada a objetos (OOP) que encapsula a lógica de interação com a API do LLM, define o prompt de sistema, registra as tools e processa o laço (*loop*) de iterações em que o modelo invoca as funções até retornar uma string final.
+* `src/AI/Agent/AgentRunner.php`: **O coração da execução do agente.** É uma classe orientada a objetos (OOP) que encapsula a lógica de interação com a API do LLM. Recebe parâmetros de configuração flexíveis via array no construtor (como chaves da API, lidando inteligentemente com a raiz do projeto mesmo se instalado via *vendor*), gerencia o histórico e define o prompt. Registra as tools e processa o laço (*loop*) de iterações em que o modelo invoca as funções até retornar uma string final.
+* `src/AI/Agent/MessageCollection.php`: Classe de abstração para armazenar, validar e exportar o histórico de mensagens consumido pelo LLM.
 * `src/AI/Tools/`: Contém as ferramentas (Tools) PHP que o agente pode chamar.
   * `SearchWebTool.php`: Ferramenta para buscar conteúdo na internet.
   * `ReadUrlTool.php`: Ferramenta que lê o conteúdo principal (scraping) de um site.
@@ -21,12 +22,13 @@ O projeto `search-agent` (ou LLPhant Agent) é uma aplicação em PHP construíd
 
 A arquitetura do Agente é baseada em *Function Calling* (chamada de ferramentas).
 O fluxo principal (`AgentRunner->run()`) funciona assim:
-1. O `AgentRunner` recebe o prompt do usuário.
-2. O prompt do sistema injeta uma lista dinâmica de **Skills** disponíveis no projeto.
-3. O LLM decide se tem a resposta ou se precisa usar uma Tool. 
-4. Se o modelo precisa de uma informação que está em uma *Skill* (ex: analista fiscal), ele aciona a ferramenta `readSkill` e lê as regras de atuação antes de continuar.
-5. Se o modelo precisa ler as notícias atuais, ele pode acionar a ferramenta `search` ou `read` em um loop de retroalimentação (`while`).
-6. Quando o modelo tiver tudo o que precisa, ele responde o texto final e o loop se encerra.
+1. O desenvolvedor pode opcionalmente injetar um contexto prévio usando `$runner->setMessages()`.
+2. O `AgentRunner` recebe o prompt final do usuário.
+3. O prompt do sistema injeta uma lista dinâmica de **Skills** disponíveis no projeto e a data atual.
+4. O LLM decide se tem a resposta ou se precisa usar uma Tool. 
+5. Se o modelo precisa de uma informação que está em uma *Skill* (ex: analista fiscal), ele aciona a ferramenta `readSkill` e lê as regras de atuação antes de continuar.
+6. Se o modelo precisa ler as notícias atuais, ele pode acionar a ferramenta `search` ou `read` em um loop de retroalimentação (`while`).
+7. Quando o modelo tiver tudo o que precisa, ele responde o texto final e o loop se encerra.
 
 ## 4. Instruções para o Agente de Codificação de IA
 

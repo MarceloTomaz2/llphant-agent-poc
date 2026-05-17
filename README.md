@@ -12,9 +12,10 @@ O objetivo central deste projeto é testar, na prática, a construção de um **
 ## 🚀 Arquitetura OOP
 
 Nesta versão de estudos, evoluímos a base para ser totalmente Orientada a Objetos. O núcleo do projeto se apoia na classe `AgentRunner`, que:
-1. Carrega automaticamente as variáveis de ambiente com `Dotenv`.
-2. Inicia a classe `OpenAIChat` do LLPhant e acopla dinamicamente as *Tools*.
-3. Entra em um loop contínuo de avaliação e execução, garantindo que o Agente faça quantas chamadas de ferramenta forem necessárias até conseguir processar a resposta final para o usuário.
+1. Possui flexibilidade na configuração: lê automaticamente as variáveis de ambiente com `Dotenv` (identificando inclusive quando é chamado de dentro da pasta `vendor` de outro projeto, como o Adianti Framework), ou recebe chaves e configurações diretamente por um array de opções no construtor.
+2. Gerencia o histórico de forma inteligente utilizando a classe `MessageCollection`, permitindo injeção de contexto via `$runner->setMessages()`.
+3. Inicia a classe `OpenAIChat` do LLPhant e acopla dinamicamente as *Tools* obrigatórias (permitindo a injeção de novas tools customizadas via `addTool()`).
+4. Entra em um loop contínuo de avaliação e execução, garantindo que o Agente faça quantas chamadas de ferramenta forem necessárias até conseguir processar a resposta final para o usuário.
 
 ## 🛠️ Como Utilizar
 - **Buscas na Internet (SearXNG):** Este projeto utiliza o **[SearXNG](https://github.com/searxng/searxng)** como motor de pesquisa para evitar limites de requisição de buscadores convencionais.
