@@ -16,6 +16,7 @@ Nesta versão de estudos, evoluímos a base para ser totalmente Orientada a Obje
 2. Gerencia o histórico de forma inteligente utilizando a classe `MessageCollection`, permitindo injeção de contexto via `$runner->setMessages()`.
 3. Inicia a classe `OpenAIChat` do LLPhant e acopla dinamicamente as *Tools* obrigatórias (permitindo a injeção de novas tools customizadas via `addTool()`).
 4. Entra em um loop contínuo de avaliação e execução, garantindo que o Agente faça quantas chamadas de ferramenta forem necessárias até conseguir processar a resposta final para o usuário.
+5. Garante a integridade do histórico do chat convertendo corretamente os Enums de papéis (ex: `ChatRole`) e serializando as mensagens para persistência em sessão (`$_SESSION`), evitando que a IA "esqueça" o contexto em interações contínuas via web.
 
 ## 🛠️ Como Utilizar
 - **Buscas na Internet (SearXNG):** Este projeto utiliza o **[SearXNG](https://github.com/searxng/searxng)** como motor de pesquisa para evitar limites de requisição de buscadores convencionais.
@@ -25,8 +26,8 @@ Nesta versão de estudos, evoluímos a base para ser totalmente Orientada a Obje
     ```
   - Após iniciar, certifique-se de configurar a variável `SEARXNG_URL` no seu `.env` com a URL local do serviço (ex: `http://localhost:9085/search` ou o IP específico configurado).
 - **Configuração:** Configure as chaves de API clonando o `.env_exemple` para `.env` na raiz.
-- **Interface de Chat (SSE):** Acesse `chat.php` no seu navegador usando um servidor local (ex: `php -S localhost:8000`) para interagir com o agente através de uma interface gráfica que utiliza o protocolo *Server-Sent Events* e gerencia contexto via sessão.
-- **Execução via CLI:** Você também pode rodar e dar uma instrução inicial ao Agente via terminal executando `php index.php`.
+- **Interface de Chat Web (SSE):** Para interagir com o agente através da interface gráfica visual, inicie um servidor embutido (`php -S localhost:8000`) e acesse o diretório raiz no navegador. O arquivo `index.php` renderiza a UI e gerencia a conexão bidirecional usando o protocolo *Server-Sent Events (SSE)*. O contexto e a evolução do chat são rigorosamente controlados através da sessão nativa do PHP.
+- **Execução via CLI:** Você também pode rodar e dar uma instrução inicial ao Agente via terminal passando parâmetros, se adaptado para seu fluxo, ou através de scripts dedicados.
 - **Testes:** Testes unitários foram preparados com o **PHPUnit** na pasta `tests/` para validar o motor de iterações (`AgentRunner`).
 
 > **Nota:** Este projeto é de caráter puramente experimental. Idealizado como base de código para testar capacidades em IA, desenvolvimento orientado a Skills modulares e manutenções assistidas.

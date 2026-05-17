@@ -25,10 +25,10 @@ class AgentRunner
         $this->messages = new MessageCollection();
         // Verifica se o pacote está rodando de dentro da pasta "vendor" de outro projeto (ex: Adianti)
         $isVendor = strpos(__DIR__, DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR) !== false;
-        
+
         // Se estiver no vendor, a raiz do projeto hospedeiro está 5 níveis acima. Senão, está a 3.
         $rootPath = $isVendor ? dirname(__DIR__, 5) : dirname(__DIR__, 3);
-        
+
         if (file_exists($rootPath . DIRECTORY_SEPARATOR . '.env')) {
             $dotenv = Dotenv::createMutable($rootPath);
             $dotenv->safeLoad();
@@ -129,9 +129,11 @@ Para completar as tarefas solicitadas, identifique a melhor abordagem usando as 
         $this->chat->addTool($tool);
     }
 
-    public function run(string $prompt): string
+    public function run(?string $prompt = null): string
     {
-        $this->messages->add(Message::user($prompt));
+        if ($prompt !== null) {
+            $this->messages->add(Message::user($prompt));
+        }
 
         $iteration = 0;
 
