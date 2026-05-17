@@ -25,7 +25,8 @@ Nesta versão de estudos, evoluímos a base para ser totalmente Orientada a Obje
     ```
   - Após iniciar, certifique-se de configurar a variável `SEARXNG_URL` no seu `.env` com a URL local do serviço (ex: `http://localhost:9085/search` ou o IP específico configurado).
 - **Configuração:** Configure as chaves de API clonando o `.env_exemple` para `.env` na raiz.
-- **Execução:** Você interage e dá a instrução inicial ao Agente instanciando-o e rodando o comando no `index.php`.
+- **Interface de Chat (SSE):** Acesse `chat.php` no seu navegador usando um servidor local (ex: `php -S localhost:8000`) para interagir com o agente através de uma interface gráfica que utiliza o protocolo *Server-Sent Events* e gerencia contexto via sessão.
+- **Execução via CLI:** Você também pode rodar e dar uma instrução inicial ao Agente via terminal executando `php index.php`.
 - **Testes:** Testes unitários foram preparados com o **PHPUnit** na pasta `tests/` para validar o motor de iterações (`AgentRunner`).
 
 > **Nota:** Este projeto é de caráter puramente experimental. Idealizado como base de código para testar capacidades em IA, desenvolvimento orientado a Skills modulares e manutenções assistidas.

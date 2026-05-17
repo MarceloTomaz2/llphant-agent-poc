@@ -9,6 +9,7 @@ O projeto `search-agent` (ou LLPhant Agent) é uma aplicação em PHP construíd
 
 * `src/AI/Agent/AgentRunner.php`: **O coração da execução do agente.** É uma classe orientada a objetos (OOP) que encapsula a lógica de interação com a API do LLM. Recebe parâmetros de configuração flexíveis via array no construtor (como chaves da API, lidando inteligentemente com a raiz do projeto mesmo se instalado via *vendor*), gerencia o histórico e define o prompt. Registra as tools e processa o laço (*loop*) de iterações em que o modelo invoca as funções até retornar uma string final.
 * `src/AI/Agent/MessageCollection.php`: Classe de abstração para armazenar, validar e exportar o histórico de mensagens consumido pelo LLM.
+* `chat.php`: Uma interface visual web (HTML/JS) que comunica com o agente em tempo real utilizando o protocolo SSE (Server-Sent Events) e persiste contexto usando `$_SESSION`.
 * `src/AI/Tools/`: Contém as ferramentas (Tools) PHP que o agente pode chamar.
   * `SearchWebTool.php`: Ferramenta para buscar conteúdo na internet.
   * `ReadUrlTool.php`: Ferramenta que lê o conteúdo principal (scraping) de um site.
